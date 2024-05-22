@@ -6,30 +6,32 @@ import {
   View,
   TouchableOpacity,
 } from "react-native";
-
-import { HelloWave } from "@/components/HelloWave";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
 import Button from "@/components/components/Button";
 import { useState } from "react";
 
 export default function HomeScreen() {
-  const arr = [
+  const [array, setArray] = useState([
     { title: "a", id: 0, selected: false },
     { title: "a", id: 1, selected: false },
     { title: "b", id: 2, selected: false },
     { title: "3", id: 3, selected: false },
     { title: "4", id: 4, selected: false },
     { title: "5", id: 5, selected: false },
-  ];
-
-  const [array, setArray] = useState(arr);
+  ]);
   const [seletedIds, setSeletedIds] = useState<number[]>([]);
   const [prev, setprev] = useState(-1);
   const [prev2, setprev2] = useState(-1);
+  const [select, setSelect] = useState(true);
 
   function onClick(id: number) {
+    if (select === false) {
+      for (let i = 0; i < array.length; i++) {
+        if (array[i].selected === true) makeSelection(i);
+      }
+      setSelect(true);
+    }
+    makeSelection(id);
+
     if (id > prev && prev != -1) {
       if (array[prev].selected === true) {
         for (let j = prev + 1; j < id; j++) {
@@ -37,25 +39,36 @@ export default function HomeScreen() {
         }
       }
     }
-    if (id < prev && prev != -1) {
-      if (array[prev].selected === true) {
-        for (let j = id + 1; j < prev; j++) {
-          makeSelection(j, prev);
+    if (select === true) {
+      if (id < prev) {
+        if (array[prev].selected === true) {
+          for (let j = id + 1; j < prev; j++) {
+            if (array[j].selected !== true) makeSelection(j);
+          }
+          setSelect(!select);
         }
       }
     }
-    if (prev < prev2) {
-      for (let i = prev; i < prev2; i++) {
-        makeSelection;
-      }
-    }
-    makeSelection(id);
+
+    // }
+    // if (id < prev && prev != -1) {
+    //   if (array[prev].selected === true) {
+    //     for (let j = id + 1; j < prev; j++) {
+    //       makeSelection(j, prev);
+    //     }
+    //   }
+    // }
+    // if (prev < prev2) {
+    //   for (let i = prev; i < prev2; i++) {
+    //     makeSelection;
+    //   }
+    // }
+    setprev(id);
   }
 
   function makeSelection(id: number, prev?: number) {
-    if (prev) setprev2(prev);
+    // if (prev) setprev2(prev);
 
-    setprev(id);
     for (let i = 0; i < array.length; i++) {
       if (array[i].id === id) {
         array[i].selected = !array[i].selected;
