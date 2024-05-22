@@ -24,13 +24,26 @@ export default function HomeScreen() {
   const [select, setSelect] = useState(true);
 
   function onClick(id: number) {
-    if (select === false) {
-      for (let i = 0; i < array.length; i++) {
-        if (array[i].selected === true) makeSelection(i);
+    // if (select === false) {
+    //   for (let i = 0; i < array.length; i++) {
+    //     if (array[i].selected === true) makeSelection(i);
+    //   }
+    //   setSelect(true);
+    // }
+    if (array[id].selected === true) {
+      // console.log("c");
+      removeSelection(id);
+      setprev(id);
+      return;
+    } else if (array[id].selected === false) {
+      if (select === false) {
+        for (let i = 0; i < array.length; i++) {
+          removeSelection(i);
+        }
       }
+      makeSelection(id);
       setSelect(true);
     }
-    makeSelection(id);
 
     if (id > prev && prev != -1) {
       if (array[prev].selected === true) {
@@ -44,37 +57,24 @@ export default function HomeScreen() {
         if (array[prev].selected === true) {
           for (let j = id + 1; j < prev; j++) {
             if (array[j].selected !== true) makeSelection(j);
+            if (array[j].selected !== true) makeSelection(j);
           }
-          setSelect(!select);
+          setSelect(false);
         }
       }
     }
-
-    // }
-    // if (id < prev && prev != -1) {
-    //   if (array[prev].selected === true) {
-    //     for (let j = id + 1; j < prev; j++) {
-    //       makeSelection(j, prev);
-    //     }
-    //   }
-    // }
-    // if (prev < prev2) {
-    //   for (let i = prev; i < prev2; i++) {
-    //     makeSelection;
-    //   }
-    // }
     setprev(id);
   }
 
   function makeSelection(id: number, prev?: number) {
-    // if (prev) setprev2(prev);
-
-    for (let i = 0; i < array.length; i++) {
-      if (array[i].id === id) {
-        array[i].selected = !array[i].selected;
-      }
-    }
-    setArray([...array]);
+    const newArr = [...array];
+    newArr[id].selected = true;
+    setArray(newArr);
+  }
+  function removeSelection(id: number, prev?: number) {
+    const newArr = [...array];
+    newArr[id].selected = false;
+    setArray(newArr);
   }
   return (
     <>

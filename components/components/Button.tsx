@@ -7,7 +7,6 @@ interface buttonProps {
 }
 
 function Button(props: buttonProps): JSX.Element {
-  console.log(props.selected);
   return (
     <View
       style={[
