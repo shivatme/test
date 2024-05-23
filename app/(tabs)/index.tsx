@@ -1,127 +1,176 @@
+import React, { useEffect, useState } from "react";
 import {
-  Image,
-  StyleSheet,
-  Platform,
-  FlatList,
   View,
-  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  Button,
+  Text,
+  ActivityIndicator,
+  Pressable,
 } from "react-native";
-import Button from "@/components/components/Button";
-import { useState } from "react";
 
-export default function HomeScreen() {
-  const [array, setArray] = useState([
-    { title: "a", id: 0, selected: false },
-    { title: "a", id: 1, selected: false },
-    { title: "b", id: 2, selected: false },
-    { title: "3", id: 3, selected: false },
-    { title: "4", id: 4, selected: false },
-    { title: "5", id: 5, selected: false },
-  ]);
-  const [seletedIds, setSeletedIds] = useState<number[]>([]);
-  const [prev, setprev] = useState(-1);
-  const [prev2, setprev2] = useState(-1);
-  const [select, setSelect] = useState(true);
+import Test from "@/components/components/Test";
+import ListItem from "@/components/components/ListItem";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
-  function onClick(id: number) {
-    // if (select === false) {
-    //   for (let i = 0; i < array.length; i++) {
-    //     if (array[i].selected === true) makeSelection(i);
-    //   }
-    //   setSelect(true);
-    // }
-    if (array[id].selected === true) {
-      // console.log("c");
-      removeSelection(id);
-      setprev(id);
-      return;
-    } else if (array[id].selected === false) {
-      if (select === false) {
-        for (let i = 0; i < array.length; i++) {
-          removeSelection(i);
-        }
-      }
-      makeSelection(id);
-      setSelect(true);
-    }
+interface indexProps {}
 
-    if (id > prev && prev != -1) {
-      if (array[prev].selected === true) {
-        for (let j = prev + 1; j < id; j++) {
-          makeSelection(j);
-        }
-      }
-    }
-    if (select === true) {
-      if (id < prev) {
-        if (array[prev].selected === true) {
-          for (let j = id + 1; j < prev; j++) {
-            if (array[j].selected !== true) makeSelection(j);
-            if (array[j].selected !== true) makeSelection(j);
-          }
-          setSelect(false);
-        }
-      }
-    }
-    setprev(id);
+function index(props: indexProps): JSX.Element {
+  // const [response, setResponse] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [response, setResponse] = useState<any>();
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  async function getItems() {
+    setRefreshing(true);
+    const res = await fetchData();
+    setResponse(res);
+    setRefreshing(false);
   }
 
-  function makeSelection(id: number, prev?: number) {
-    const newArr = [...array];
-    newArr[id].selected = true;
-    setArray(newArr);
+  const handleClick = (id: number) => {
+    setSelectedIds((prevSelectedIds) => {
+      if (prevSelectedIds.includes(id)) {
+        return prevSelectedIds.filter((selectedId) => selectedId !== id);
+      } else {
+        return [...prevSelectedIds, id];
+      }
+    });
+  };
+
+  function logSelectedIds() {
+    console.log("Selected IDs are: " + selectedIds);
   }
-  function removeSelection(id: number, prev?: number) {
-    const newArr = [...array];
-    newArr[id].selected = false;
-    setArray(newArr);
-  }
+
+  useEffect(() => {
+    getItems();
+  }, []);
   return (
-    <>
+    <View style={styles.container}>
       <View
         style={{
-          justifyContent: "center",
-          alignItems: "center",
-          flex: 1,
-          top: 100,
-          // backgroundColor: "red",
+          flexDirection: "row",
+          justifyContent: "space-evenly",
         }}
       >
-        {array && (
-          <FlatList
-            data={array}
-            horizontal
-            renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => onClick(item.id)}>
-                <Button
-                  key={item.id}
-                  title={item.title}
-                  selected={item.selected}
-                />
-              </TouchableOpacity>
-            )}
-          />
-        )}
+        <Button title="Log Selected" onPress={logSelectedIds} />
       </View>
-    </>
+      <View style={styles.container2}>
+        <Text style={styles.text}>Shape</Text>
+        <Text style={styles.text}>Size</Text>
+        <Text style={styles.text}>Price</Text>
+        <Text style={styles.text}>Cut</Text>
+        <Text style={styles.text}>Open</Text>
+      </View>
+      {!response ? (
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            flex: 1,
+          }}
+        >
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      ) : (
+        <FlatList
+          refreshing={refreshing} // Set refreshing state
+          onRefresh={getItems}
+          data={response}
+          renderItem={({ item }) => (
+            // <TouchableOpacity onPress={() => handleClick(item.stoneid)}>
+            <Pressable onPress={() => handleClick(item.stoneid)}>
+              <ListItem
+                key={item.stoneid}
+                item={item}
+                onClickIcon={handleClick}
+                backgroundColor={
+                  selectedIds.includes(item.stoneid) ? "#8bbcf0" : "white"
+                }
+              />
+            </Pressable>
+            // </TouchableOpacity>
+          )}
+        />
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    top: 50,
+    flex: 1,
+  },
+  container2: {
     flexDirection: "row",
+    // width: "100%",
+    height: 50,
+    marginVertical: 2,
+    justifyContent: "space-between",
     alignItems: "center",
-    gap: 8,
+    borderRadius: 8,
+    marginHorizontal: 5,
+    paddingHorizontal: 10,
+    backgroundColor: "#2c7cc1",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
+  text: {
+    color: "white",
+    fontSize: 18,
+    // fontWeight: "",
   },
 });
+
+export default index;
+
+const fetchData = async () => {
+  try {
+    const res = await fetch("http://192.168.51.2:8083/stone/stock/query", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization:
+          "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcxNjQ1MTc1NiwiZXhwIjoxNzE2NDg0MTU2fQ.uc0Y6Qq85di4tEwM8WlYXFovvsmZ8DjkGgdC64gzT-4",
+      },
+      body: `{
+              "shape": [],
+              "color": [],
+              "fromintensity": "",
+              "tointensity": "",
+              "fancycolor1": [],
+              "fancycolor2": [],
+              "clarity": [],
+              "cut": [],
+              "pol": [],
+              "sym": [],
+              "flo": [],
+              "lab": [],
+              "bgm": "",
+              "black": "",
+              "depthfrom": "",
+              "depthto": "",
+              "tablefrom": "",
+              "tableto": "",
+              "ratiofrom": "",
+              "ratioto": "",
+              "lengthfrom": "",
+              "lengthto": "",
+              "widthfrom": "",
+              "widthto": "",
+              "fancyintensity": [],
+              "fancyovertone": [],
+              "sizemasterid": [],
+              "generalsize": [],
+              "locationid": [],
+              "cpricefrom": "",
+              "cpriceto": "",
+              "tpricefrom": "",
+              "tpriceto": "",
+              "reportnumber": ""
+          }`,
+    });
+    const json = await res.json();
+    return json;
+  } catch (error) {
+    return error;
+  }
+};
